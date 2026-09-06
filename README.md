@@ -1,10 +1,52 @@
 # Skill Inventory
 
+> 内部 Skill 管理平台 — 统一管理公司可复用的 Skill，并向内部插件/客户端提供读取接口。
+
+- **在线演示**：https://skill-inventory.ouber.fun/
+- **源码仓库**：https://github.com/ouber/Skill-Inventory
+
 A lightweight internal **Skill server platform** for managing and serving reusable Skills
 to internal plugins and clients. Built with **Next.js (App Router) + TypeScript +
 Tailwind CSS + shadcn/ui + MongoDB (Mongoose)**.
 
-***
+---
+
+## 快速了解（给面试官）
+
+### 项目一句话
+一个面向公司内部的 Skill 服务器：管理员在 Web 端对 Skill 进行 **创建 / 查看 / 更新 / 发布 / 删除**，内部插件或客户端通过 **远端 HTTP 接口** 读取已发布的 Skill 内容。
+
+### 技术栈
+- **框架**：Next.js 16（App Router）+ React 19 + TypeScript
+- **样式**：Tailwind CSS v4 + shadcn/ui（base-nova）
+- **数据库**：MongoDB Atlas + Mongoose（带连接缓存，避免开发态连接风暴）
+- **其他**：lucide-react、react-markdown
+
+### 核心设计
+- **数据模型**：`Skill`（name / slug / description / content(Markdown) / category / tags / version / status / author），`slug` 唯一索引。
+- **生命周期**：`draft` ↔ `published`。只有 `published` 的 Skill 才会出现在公开列表与客户端接口中。
+- **双 API 命名空间**：
+  - 管理端 `/api/skills`：完整 CRUD + 发布切换（可选 `ADMIN_TOKEN` 头部鉴权）
+  - 公开端 `/api/public/skills`：仅返回已发布 Skill，供插件/客户端消费
+
+### 本地运行
+```bash
+pnpm install
+cp .env.example .env.local   # 填入 MONGODB_URI
+pnpm dev                     # http://localhost:3000
+```
+
+### 演示内容
+1. **首页 `/`** — 已发布 Skill 的卡片列表。
+2. **详情页 `/skills/[slug]`** — Markdown 渲染的 Skill 全文、元信息、一键复制，底部标注客户端调用地址。
+3. **管理端 `/admin`** — 表格展示全部 Skill（含草稿），支持查看 / 编辑 / 发布切换 / 删除（带确认弹窗）。
+4. **新建 `/admin/new`** — 表单填写，输入名称时自动生成 kebab-case slug。
+5. **接口演示**：
+   - `GET /api/public/skills` — 列出已发布 Skill
+   - `GET /api/public/skills/:slug` — 获取单个 Skill 完整内容
+   - `POST /api/skills` / `PUT /api/skills/:id` / `DELETE /api/skills/:id` — 管理端 CRUD
+
+---
 
 ## 1. Overview
 
